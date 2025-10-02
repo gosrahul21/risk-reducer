@@ -7,6 +7,8 @@ import {
   StopLoss,
   Strategy,
   ApiResponse,
+  PriceAlert,
+  PriceAlertType,
 } from "../types";
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3000";
@@ -156,6 +158,32 @@ export const apiService = {
   async getAllPrices(): Promise<{ prices: Record<string, number> }> {
     const response = await api.get("/prices");
     return response.data.data || response.data;
+  },
+
+  // Price Alerts
+  async createPriceAlert(
+    symbol: string,
+    price: number,
+    type: PriceAlertType,
+    count: number = 1
+  ): Promise<ApiResponse<PriceAlert>> {
+    const response = await api.post("/price-alert", {
+      symbol,
+      price,
+      type,
+      count,
+    });
+    return response.data;
+  },
+
+  async getPriceAlerts(): Promise<{ priceAlerts: PriceAlert[] }> {
+    const response = await api.get("/price-alerts");
+    return response.data.data || response.data;
+  },
+
+  async removePriceAlert(symbol: string): Promise<ApiResponse> {
+    const response = await api.delete(`/price-alert/${symbol}`);
+    return response.data;
   },
 };
 

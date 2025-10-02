@@ -10,6 +10,7 @@ export interface Notification {
   id: string;
   type:
     | "price_update"
+    | "price_alert"
     | "order_update"
     | "stop_loss_triggered"
     | "strategy_alert"
@@ -120,6 +121,21 @@ export class WebSocketService {
       case "price_update":
         if (message.data) {
           this.notifyPriceUpdate(message.data as PriceUpdate);
+        }
+        break;
+      case "price_alert":
+        if (message.data) {
+          // Convert price alert to notification format
+          const alertData = message.data;
+          const notification: Notification = {
+            id: Math.random().toString(36).substr(2, 9),
+            type: "price_alert",
+            title: "Price Alert",
+            message: alertData.message || `Price Alert: ${alertData.symbol} has reached ${alertData.price}`,
+            timestamp: Date.now(),
+            data: alertData,
+          };
+          this.notifyNotification(notification);
         }
         break;
       case "notification":

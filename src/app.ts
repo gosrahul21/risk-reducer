@@ -11,6 +11,7 @@ import { PriceService } from "./services/PriceService";
 import { TradingService } from "./services/TradingService";
 import { database } from "./config/database";
 import cors from "cors";
+import { PriceAlertService } from "./services/PriceAlertService";
 // Load environment variables
 dotenv.config();
 
@@ -25,6 +26,7 @@ export class App {
   private strategyService!: StrategyService;
   private priceService!: PriceService;
   private tradingService!: TradingService;
+  private priceAlertService!: PriceAlertService;
 
   constructor() {
     this.app = express();
@@ -54,6 +56,7 @@ export class App {
     this.apiService = new ApiService();
     this.stopLossService = new StopLossService();
     this.priceService = new PriceService();
+    this.priceAlertService = new PriceAlertService();
     this.strategyService = new StrategyService(this.stopLossService);
     this.tradingService = new TradingService(
       this.apiService,
@@ -79,6 +82,7 @@ export class App {
       this.stopLossService,
       this.strategyService,
       this.priceService,
+      this.priceAlertService,
       this.webSocketServer
     );
     this.app.use("/", router);
@@ -94,9 +98,17 @@ export class App {
     // Set WebSocketServer for StopLossService
     this.stopLossService.setWebSocketServer(this.webSocketServer);
 
+    // Set WebSocketServer for PriceAlertService
+    this.priceAlertService.setWebSocketServer(this.webSocketServer);
+
+
+
     // Set up price update handling
     this.webSocketService.onPriceUpdate((symbol: string, price: number) => {
       this.tradingService.handleStopLossTrigger(symbol, price);
+
+      // Check price alerts
+      this.priceAlertService.checkPriceAlerts(symbol, price);
 
       // Broadcast price update to frontend clients
       this.webSocketServer.broadcastPriceUpdate(symbol, price);

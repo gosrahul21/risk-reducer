@@ -14,6 +14,7 @@ import {
   Activity,
   Wallet,
   Target,
+  Bell,
 } from "lucide-react";
 import NotificationCenter from "./NotificationCenter";
 
@@ -63,6 +64,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       href: "/prices",
       icon: DollarSign,
       color: "from-cyan-500 to-cyan-600",
+    },
+    {
+      name: "Price Alerts",
+      href: "/price-alerts",
+      icon: Bell,
+      color: "from-yellow-500 to-yellow-600",
     },
   ];
 
