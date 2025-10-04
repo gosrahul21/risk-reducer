@@ -206,6 +206,7 @@ const Orders: React.FC = () => {
         side: side,
         margin_currency_short_name: selectedCurrency,
         pair: newOrder.pair, // Use the selected pair from dropdown
+        total_quantity: parseFloat(newOrder.total_quantity?.toFixed(1)!) || 0,
       };
       await apiService.createOrder(orderData);
       setShowCreateForm(false);

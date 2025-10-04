@@ -1,5 +1,15 @@
+import { ApiService } from "./ApiService";
+import { PriceService } from "./PriceService";
+
 export class TechnicalService {
-  constructor() {}
+  private cache: {
+    [key: string]: {
+      [timeframe: string]: number[];
+    };
+  } = {};
+  constructor(private priceService: PriceService) {
+    this.priceService = priceService;
+  }
 
   public findLastSupport(candles: any[]): number | undefined {
     if (candles.length < 5) return undefined;
@@ -228,5 +238,36 @@ export class TechnicalService {
 
     // Return the first support level
     return s1;
+  }
+
+
+  async getLastSupportLevels(candles: any[], currentPrice: number, lastN = 10): Promise<number[]> {
+    const supports = candles.filter((c) => c.low < currentPrice ).map((c) => c.low);
+    supports.sort((a, b) => b - a);
+    return supports.slice(0,lastN);
+  }
+
+  async getLastResistanceLevels(candles: any[], currentPrice: number, lastN = 10): Promise<number[]> {
+    const resistances = candles.filter((c) => c.high > currentPrice ).map((c) => c.high);
+    resistances.sort((a, b) => a-b);
+    return resistances.slice(0,lastN);
+  }
+
+  async getLastSupportResistanceLevels(symbol: string, timeframe = '4h', lastN = 10): Promise<{supports: number[], resistances: number[]}> {
+    const candles = this.cache[symbol]?.[timeframe] || [];
+    if (candles.length === 0) {
+      const candles = await this.priceService.fetchCandles(symbol, timeframe, 1000);
+      this.cache[symbol] = {
+        [timeframe]: candles,
+      };
+    }
+    // const candles = await this.priceService.fetchCandles(symbol, timeframe, 1000);
+    const currentPrice = await this.priceService.getPrice(symbol) || 0;
+    const supports = await this.getLastSupportLevels(candles, currentPrice, lastN);
+    const resistances = await this.getLastResistanceLevels(candles, currentPrice, lastN);
+    return {
+      supports,
+      resistances,
+    };
   }
 }

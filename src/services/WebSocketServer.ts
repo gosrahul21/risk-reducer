@@ -1,11 +1,13 @@
 import WebSocket from "ws";
 import { Server as HttpServer } from "http";
 import { IWebSocketService } from "../interfaces/IApiService";
+import { PriceAlertType } from "./PriceAlertService";
 
 export interface Notification {
   id: string;
   type:
     | "price_update"
+    | "price_alert"
     | "order_update"
     | "stop_loss_triggered"
     | "strategy_alert"
@@ -124,6 +126,29 @@ export class WebSocketServer {
     this.priceCallbacks.forEach((callback) => callback(symbol, price));
   }
 
+    // Broadcast price update to all connected clients
+    public broadcastPriceAlert(
+      symbol: string,
+      price: number,
+      type: PriceAlertType
+    ): void {
+      const message = `Price Alert: ${symbol} has reached ${price}`;
+      const priceUpdate = {
+        symbol,
+        price,
+        type,
+        message,
+      };
+      
+      this.broadcast({
+        type: "price_alert",
+        data: priceUpdate,
+      });
+  
+      // Notify internal callbacks
+      this.priceCallbacks.forEach((callback) => callback(symbol, price));
+    }
+
   // Broadcast notification to all connected clients
   public broadcastNotification(
     notification: Omit<Notification, "id" | "timestamp">
@@ -195,8 +220,8 @@ export class WebSocketServer {
     });
   }
 
-  // Internal methods
-  private broadcast(message: any): void {
+  // Public broadcast method for custom messages
+  public broadcast(message: any): void {
     const messageStr = JSON.stringify(message);
     this.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {

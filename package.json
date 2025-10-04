@@ -19,6 +19,7 @@
   "author": "",
   "license": "ISyarC",
   "dependencies": {
+    "@types/uuid": "8.3.4",
     "axios": "^1.12.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.2",
@@ -26,6 +27,7 @@
     "mongoose": "^8.8.4",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
+    "uuid": "8.3.2",
     "ws": "^8.18.0"
   },
   "devDependencies": {

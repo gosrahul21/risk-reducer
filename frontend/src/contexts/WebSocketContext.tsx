@@ -92,8 +92,8 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
       setNotifications((prev) => [notification, ...prev.slice(0, 49)]); // Keep last 50 notifications
       setLastNotification(notification);
 
-      // Play sound for stop loss notifications
-      if (notification.type === "stop_loss_triggered") {
+      // Play sound for important notifications
+      if (notification.type === "stop_loss_triggered" || notification.type === "price_alert") {
         SoundUtils.playNotificationSound(notification.type);
       }
     };

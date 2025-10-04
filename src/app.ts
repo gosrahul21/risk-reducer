@@ -11,6 +11,8 @@ import { PriceService } from "./services/PriceService";
 import { TradingService } from "./services/TradingService";
 import { database } from "./config/database";
 import cors from "cors";
+import { PriceAlertService } from "./services/PriceAlertService";
+import { TechnicalService } from "./services/TechnicalService";
 // Load environment variables
 dotenv.config();
 
@@ -25,6 +27,8 @@ export class App {
   private strategyService!: StrategyService;
   private priceService!: PriceService;
   private tradingService!: TradingService;
+  private priceAlertService!: PriceAlertService;
+  private technicalService!: TechnicalService;
 
   constructor() {
     this.app = express();
@@ -54,14 +58,18 @@ export class App {
     this.apiService = new ApiService();
     this.stopLossService = new StopLossService();
     this.priceService = new PriceService();
-    this.strategyService = new StrategyService(this.stopLossService);
+    this.priceAlertService = new PriceAlertService();
+
+    this.webSocketService = new WebSocketService();
+    this.technicalService = new TechnicalService(this.priceService);
+    this.strategyService = new StrategyService(this.stopLossService, this.priceService, this.technicalService);
+
     this.tradingService = new TradingService(
       this.apiService,
       this.stopLossService,
       this.priceService,
       this.strategyService
     );
-    this.webSocketService = new WebSocketService();
   }
 
   private setupMiddleware(): void {
@@ -79,6 +87,7 @@ export class App {
       this.stopLossService,
       this.strategyService,
       this.priceService,
+      this.priceAlertService,
       this.webSocketServer
     );
     this.app.use("/", router);
@@ -94,9 +103,19 @@ export class App {
     // Set WebSocketServer for StopLossService
     this.stopLossService.setWebSocketServer(this.webSocketServer);
 
+    // Set WebSocketServer for PriceAlertService
+    this.priceAlertService.setWebSocketServer(this.webSocketServer);
+
+
+
     // Set up price update handling
     this.webSocketService.onPriceUpdate((symbol: string, price: number) => {
       this.tradingService.handleStopLossTrigger(symbol, price);
+
+      // Check price alerts
+      this.priceAlertService.checkPriceAlerts(symbol, price);
+      this.priceService.updatePrice(symbol, price);
+
       // Broadcast price update to frontend clients
       this.webSocketServer.broadcastPriceUpdate(symbol, price);
 

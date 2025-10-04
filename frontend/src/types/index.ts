@@ -109,3 +109,23 @@ export interface CalculatedValues {
   current_price: number;
   calculated_quantity: number;
 }
+
+export enum PriceAlertType {
+  GREATER_THAN = "greater_than",
+  LESS_THAN = "less_than",
+}
+
+export interface PriceAlert {
+  id: string;
+  symbol: string;
+  price: number;
+  count: number;
+  type: PriceAlertType;
+}
+
+export interface PriceAlertNotification {
+  symbol: string;
+  price: number;
+  type: PriceAlertType;
+  message: string;
+}

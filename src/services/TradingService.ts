@@ -27,11 +27,11 @@ export class TradingService {
         currentPrice
       )}`
     );
-    await this.stopLossService.triggerStopLoss(symbol, currentPrice); // clear SL and log trigger
-    await this.strategyService.removeStrategyStopLoss(symbol);
+    // await this.stopLossService.triggerStopLoss(symbol, currentPrice); // clear SL and log trigger
+    // await this.strategyService.removeStrategyStopLoss(symbol);
     try {
-      // Get position size from API
-       symbol = getBinanceSymbolToCoindcx(symbol)
+      //   // Get position size from API
+      symbol = getBinanceSymbolToCoindcx(symbol);
       const positions = await this.apiService.getPositions(symbol);
       console.log("🔍 Positions:", positions);
       const filteredPositions = positions.filter(
@@ -43,9 +43,13 @@ export class TradingService {
           : 0.001; // fallback
 
         if (quantity > 0) {
-          await this.placeMarketSell(symbol, quantity);
+          await this.placeMarketSell(
+            position.pair,
+            quantity,
+            position.margin_currency_short_name
+          );
           await this.stopLossService.triggerStopLoss(symbol, currentPrice); // clear SL and log trigger
-    await this.strategyService.removeStrategyStopLoss(symbol);
+          await this.strategyService.removeStrategyStopLoss(symbol);
           console.log(
             `✅ Market sell executed for ${symbol}, quantity: ${quantity}`
           );
@@ -58,14 +62,17 @@ export class TradingService {
 
   private async placeMarketSell(
     symbol: string,
-    quantity: number
+    quantity: number,
+    margin_currency_short_name: string = "USDT"
   ): Promise<any> {
     try {
       const orderData = {
         side: "sell",
-        market: symbol,
+        pair: symbol,
         order_type: "market_order",
-        quantity,
+        total_quantity: quantity,
+        leverage: 1,
+        margin_currency_short_name: margin_currency_short_name,
       };
 
       const result = await this.apiService.createOrder(orderData);

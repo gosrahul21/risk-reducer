@@ -4,6 +4,7 @@ import { IStopLossService } from "./StopLossService";
 import { WebSocketServer } from "./WebSocketServer";
 import { TradingStrategyRepository } from "../repositories/TradingRepository";
 import { TechnicalService } from "./TechnicalService";
+import { PriceService } from "./PriceService";
 // Strategy Service - Open/Closed Principle: Easy to extend with new strategies
 export class StrategyService implements IStrategyService {
   private strategies: {
@@ -14,22 +15,20 @@ export class StrategyService implements IStrategyService {
       lastUpdate: number;
     };
   } = {
-    BTCUSDT: {
-      strategy: "last_close",
-      timeframe: "5m",
-      interval: 300000,
-      lastUpdate: 0,
-    },
   };
   private strategyRepository: TradingStrategyRepository;
-  private technicalService: TechnicalService;
+  private webSocketServer?: WebSocketServer;
+  // private technicalService: TechnicalService;
+  
 
   constructor(
     private stopLossService: IStopLossService,
-    private webSocketServer?: WebSocketServer
+    private priceService: PriceService,
+    private technicalService: TechnicalService
   ) {
     this.strategyRepository = new TradingStrategyRepository();
-    this.technicalService = new TechnicalService();
+    this.technicalService = technicalService;
+    this.priceService = priceService;
     this.loadStrategies();
   }
 
@@ -90,7 +89,7 @@ export class StrategyService implements IStrategyService {
     if (!config) return;
 
     try {
-      const candles = await this.fetchCandles(symbol, config.timeframe, 1000); // Get more candles for better analysis
+      const candles = await this.priceService.fetchCandles(symbol, config.timeframe, 1000); // Get more candles for better analysis
       let newSL: number | undefined;
       // console.log("🔍 Candles:", candles.slice(-2));
       if (config.strategy === "last_support") {
