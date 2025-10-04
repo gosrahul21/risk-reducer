@@ -101,7 +101,7 @@ export class StrategyService implements IStrategyService {
         newSL = this.technicalService.calculateMovingAverageSupport(candles);
       } else if (config.strategy === "fibonacci") {
         newSL = this.technicalService.calculateFibonacciSupport(candles);
-      } else if (config.strategy === "pivot_point") {
+      } else if (config.strategy === "pivot_points") {
         newSL = this.technicalService.calculatePivotPointSupport(candles);
       }
 

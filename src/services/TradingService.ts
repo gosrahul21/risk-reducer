@@ -2,6 +2,7 @@ import { IApiService } from "../interfaces/IApiService";
 import { IStopLossService } from "./StopLossService";
 import { PriceService } from "./PriceService";
 import { StrategyService } from "./StrategyService";
+import { getBinanceSymbolToCoindcx } from "../utils/symbol";
 
 // Trading Service - Single Responsibility: Handle trading logic
 export class TradingService {
@@ -28,31 +29,31 @@ export class TradingService {
     );
     await this.stopLossService.triggerStopLoss(symbol, currentPrice); // clear SL and log trigger
     await this.strategyService.removeStrategyStopLoss(symbol);
-    // try {
-    //   // Get position size from API
-      //  symbol = getBinanceSymbolToCoindcx(symbol)
-    //   const positions = await this.apiService.getPositions(symbol);
-    //   console.log("🔍 Positions:", positions);
-    //   const filteredPositions = positions.filter(
-    //     (p: any) => p.pair === `B-${symbol}` || p.pair === symbol
-    //   );
-    //   filteredPositions.forEach(async (position: any) => {
-    //     const quantity = position
-    //       ? parseFloat(position.active_pos.toString())
-    //       : 0.001; // fallback
+    try {
+      // Get position size from API
+       symbol = getBinanceSymbolToCoindcx(symbol)
+      const positions = await this.apiService.getPositions(symbol);
+      console.log("🔍 Positions:", positions);
+      const filteredPositions = positions.filter(
+        (p: any) => p.pair === `B-${symbol}` || p.pair === symbol
+      );
+      filteredPositions.forEach(async (position: any) => {
+        const quantity = position
+          ? parseFloat(position.active_pos.toString())
+          : 0.001; // fallback
 
-    //     if (quantity > 0) {
-    //       await this.placeMarketSell(symbol, quantity);
-    //       await this.stopLossService.triggerStopLoss(symbol, currentPrice); // clear SL and log trigger
-    // await this.strategyService.removeStrategyStopLoss(symbol);
-    //       console.log(
-    //         `✅ Market sell executed for ${symbol}, quantity: ${quantity}`
-    //       );
-    //     }
-    //   });
-    // } catch (err: any) {
-    //   console.error("❌ Stop loss execution failed:", err.message);
-    // }
+        if (quantity > 0) {
+          await this.placeMarketSell(symbol, quantity);
+          await this.stopLossService.triggerStopLoss(symbol, currentPrice); // clear SL and log trigger
+    await this.strategyService.removeStrategyStopLoss(symbol);
+          console.log(
+            `✅ Market sell executed for ${symbol}, quantity: ${quantity}`
+          );
+        }
+      });
+    } catch (err: any) {
+      console.error("❌ Stop loss execution failed:", err.message);
+    }
   }
 
   private async placeMarketSell(

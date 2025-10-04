@@ -97,7 +97,6 @@ export class App {
     // Set up price update handling
     this.webSocketService.onPriceUpdate((symbol: string, price: number) => {
       this.tradingService.handleStopLossTrigger(symbol, price);
-
       // Broadcast price update to frontend clients
       this.webSocketServer.broadcastPriceUpdate(symbol, price);
 

@@ -224,6 +224,8 @@ export class TechnicalService {
     const s1 = 2 * pivotPoint - high; // First support
     const s2 = pivotPoint - (high - low); // Second support
 
+    console.log("s1", s1);
+
     // Return the first support level
     return s1;
   }
