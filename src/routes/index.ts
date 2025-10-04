@@ -5,11 +5,13 @@ import { StopLossController } from "../controllers/StopLossController";
 import { StrategyController } from "../controllers/StrategyController";
 import { PriceController } from "../controllers/PriceController";
 import { PriceAlertController } from "../controllers/PriceAlertController";
+import { TechnicalController } from "../controllers/TechnicalController";
 import { IApiService } from "../interfaces/IApiService";
 import { IStopLossService } from "../services/StopLossService";
 import { IStrategyService } from "../interfaces/IApiService";
 import { PriceService } from "../services/PriceService";
 import { PriceAlertService } from "../services/PriceAlertService";
+import { TechnicalService } from "../services/TechnicalService";
 import { WebSocketServer } from "../services/WebSocketServer";
 import {
   swaggerUiHandler,
@@ -38,6 +40,7 @@ export function setupRoutes(
   const strategyController = new StrategyController(strategyService);
   const priceController = new PriceController(priceService);
   const priceAlertController = new PriceAlertController(priceAlertService);
+  const technicalController = new TechnicalController(new TechnicalService(priceService));
 
   // Order routes
   router.post("/order", (req, res) => orderController.createOrder(req, res));
@@ -94,6 +97,10 @@ export function setupRoutes(
   router.post("/price-alert",(req:  any, res: any) => priceAlertController.createPriceAlert(req, res));
   router.get("/price-alerts",(req: any, res: any) => priceAlertController.getPriceAlerts(req, res));
   router.delete("/price-alert/:symbol",(req: any, res: any) => priceAlertController.removePriceAlert(req, res));
+
+  // Technical Analysis routes
+  router.get("/technical/support-resistance/:symbol/:timeframe", (req: any, res: any) => 
+    technicalController.getSupportResistanceLevels(req, res));
 
   // Swagger documentation routes
   router.get("/api-docs", (req, res, next) => {

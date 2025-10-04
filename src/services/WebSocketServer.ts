@@ -220,8 +220,8 @@ export class WebSocketServer {
     });
   }
 
-  // Internal methods
-  private broadcast(message: any): void {
+  // Public broadcast method for custom messages
+  public broadcast(message: any): void {
     const messageStr = JSON.stringify(message);
     this.clients.forEach((client) => {
       if (client.readyState === WebSocket.OPEN) {

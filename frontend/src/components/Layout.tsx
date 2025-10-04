@@ -71,6 +71,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: Bell,
       color: "from-yellow-500 to-yellow-600",
     },
+    {
+      name: "Technical Analysis",
+      href: "/technical-analysis",
+      icon: BarChart3,
+      color: "from-indigo-500 to-indigo-600",
+    },
   ];
 
   const isActive = (href: string) => {

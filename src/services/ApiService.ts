@@ -2,6 +2,23 @@ import axios from "axios";
 import crypto from "crypto";
 import { IApiService } from "../interfaces/IApiService";
 
+export interface CreateOrderData {
+  side: string;
+  pair: string;
+  order_type: string;
+  price?: number;
+  total_quantity: number;
+  leverage: number;
+  notification?: string;
+  stop_price?: number;
+  time_in_force?: string;
+  hidden?: boolean;
+  post_only?: boolean;
+  margin_currency_short_name?: string;
+  stop_loss_price?: number;
+  take_profit_price?: number;
+}
+
 // API Service - Futures only
 export class ApiService implements IApiService {
   private baseUrl: string;
@@ -35,7 +52,7 @@ export class ApiService implements IApiService {
   // ----------------------
   // CREATE FUTURES ORDER
   // ----------------------
-  async createOrder(orderData: any): Promise<any> {
+  async createOrder(orderData: CreateOrderData): Promise<any> {
     const timeStamp = Math.floor(Date.now());
 
     const body = {

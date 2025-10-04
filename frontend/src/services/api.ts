@@ -185,6 +185,22 @@ export const apiService = {
     const response = await api.delete(`/price-alert/${symbol}`);
     return response.data;
   },
+
+  // Technical Analysis
+  async getSupportResistance(symbol: string, timeframe: string = '4h'): Promise<{
+    supports: number[];
+    resistances: number[];
+  }> {
+    const response = await api.get(`/technical/support-resistance/${symbol}/${timeframe}`);
+    console.log("🔍 Support Resistance Response:", response.data);
+    return response.data.data || response.data;
+  },
+
+  // Generic GET method for custom endpoints
+  async get(url: string): Promise<any> {
+    const response = await api.get(url);
+    return response.data;
+  },
 };
 
 export default apiService;

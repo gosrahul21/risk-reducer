@@ -2,6 +2,7 @@ import { IApiService } from "../interfaces/IApiService";
 import { IStopLossService } from "./StopLossService";
 import { PriceService } from "./PriceService";
 import { StrategyService } from "./StrategyService";
+import { getBinanceSymbolToCoindcx } from "../utils/symbol";
 
 // Trading Service - Single Responsibility: Handle trading logic
 export class TradingService {
@@ -26,45 +27,48 @@ export class TradingService {
         currentPrice
       )}`
     );
-    await this.stopLossService.triggerStopLoss(symbol, currentPrice); // clear SL and log trigger
-    await this.strategyService.removeStrategyStopLoss(symbol);
-    // try {
-    //   // Get position size from API
-      //  symbol = getBinanceSymbolToCoindcx(symbol)
-    //   const positions = await this.apiService.getPositions(symbol);
-    //   console.log("🔍 Positions:", positions);
-    //   const filteredPositions = positions.filter(
-    //     (p: any) => p.pair === `B-${symbol}` || p.pair === symbol
-    //   );
-    //   filteredPositions.forEach(async (position: any) => {
-    //     const quantity = position
-    //       ? parseFloat(position.active_pos.toString())
-    //       : 0.001; // fallback
-
-    //     if (quantity > 0) {
-    //       await this.placeMarketSell(symbol, quantity);
-    //       await this.stopLossService.triggerStopLoss(symbol, currentPrice); // clear SL and log trigger
+    // await this.stopLossService.triggerStopLoss(symbol, currentPrice); // clear SL and log trigger
     // await this.strategyService.removeStrategyStopLoss(symbol);
-    //       console.log(
-    //         `✅ Market sell executed for ${symbol}, quantity: ${quantity}`
-    //       );
-    //     }
-    //   });
-    // } catch (err: any) {
-    //   console.error("❌ Stop loss execution failed:", err.message);
-    // }
+    try {
+    //   // Get position size from API
+       symbol = getBinanceSymbolToCoindcx(symbol)
+      const positions = await this.apiService.getPositions(symbol);
+      console.log("🔍 Positions:", positions);
+      const filteredPositions = positions.filter(
+        (p: any) => p.pair === `B-${symbol}` || p.pair === symbol
+      );
+      filteredPositions.forEach(async (position: any) => {
+        const quantity = position
+          ? parseFloat(position.active_pos.toString())
+          : 0.001; // fallback
+
+        if (quantity > 0) {
+          await this.placeMarketSell(position.pair, quantity,position.margin_currency_short_name);
+          await this.stopLossService.triggerStopLoss(symbol, currentPrice,); // clear SL and log trigger
+    await this.strategyService.removeStrategyStopLoss(symbol);
+          console.log(
+            `✅ Market sell executed for ${symbol}, quantity: ${quantity}`
+          );
+        }
+      });
+    } catch (err: any) {
+      console.error("❌ Stop loss execution failed:", err.message);
+    }
   }
 
   private async placeMarketSell(
     symbol: string,
-    quantity: number
+    quantity: number,
+    margin_currency_short_name: string = 'USDT'
   ): Promise<any> {
     try {
       const orderData = {
         side: "sell",
-        market: symbol,
+        pair: symbol,
         order_type: "market_order",
-        quantity,
+        total_quantity: quantity,
+        leverage: 1,
+        margin_currency_short_name: margin_currency_short_name,
       };
 
       const result = await this.apiService.createOrder(orderData);

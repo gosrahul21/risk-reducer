@@ -10,6 +10,7 @@ import StopLoss from "./pages/StopLoss";
 import Strategies from "./pages/Strategies";
 import Prices from "./pages/Prices";
 import PriceAlerts from "./pages/PriceAlerts";
+import TechnicalAnalysis from "./pages/TechnicalAnalysis";
 import { WebSocketProvider } from "./contexts/WebSocketContext";
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
                 <Route path="/strategies" element={<Strategies />} />
                 <Route path="/prices" element={<Prices />} />
                 <Route path="/price-alerts" element={<PriceAlerts />} />
+                <Route path="/technical-analysis" element={<TechnicalAnalysis />} />
               </Routes>
             </Layout>
           </div>
