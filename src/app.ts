@@ -60,15 +60,16 @@ export class App {
     this.priceService = new PriceService();
     this.priceAlertService = new PriceAlertService();
 
+    this.webSocketService = new WebSocketService();
+    this.technicalService = new TechnicalService(this.priceService);
+    this.strategyService = new StrategyService(this.stopLossService, this.priceService, this.technicalService);
+
     this.tradingService = new TradingService(
       this.apiService,
       this.stopLossService,
       this.priceService,
       this.strategyService
     );
-    this.webSocketService = new WebSocketService();
-    this.technicalService = new TechnicalService(this.priceService);
-    this.strategyService = new StrategyService(this.stopLossService, this.priceService, this.technicalService);
   }
 
   private setupMiddleware(): void {

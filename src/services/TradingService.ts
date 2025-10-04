@@ -45,7 +45,7 @@ export class TradingService {
         if (quantity > 0) {
           await this.placeMarketSell(position.pair, quantity,position.margin_currency_short_name);
           await this.stopLossService.triggerStopLoss(symbol, currentPrice,); // clear SL and log trigger
-    await this.strategyService.removeStrategyStopLoss(symbol);
+          await this.strategyService.removeStrategyStopLoss(symbol);
           console.log(
             `✅ Market sell executed for ${symbol}, quantity: ${quantity}`
           );
